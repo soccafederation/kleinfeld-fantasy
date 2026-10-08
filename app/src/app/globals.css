@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+/* ──────────────────────────────────────────────────────────────
+   KLEINFELD FANTASY · Design Tokens · Richtung C (DKFV)
+   Keine Farben in Komponenten hart kodieren – nur diese Tokens.
+   ────────────────────────────────────────────────────────────── */
+:root {
+  /* Flächen */
+  --kf-ground: #0a0a0b;
+  --kf-surface: #141416;
+  --kf-card: #1b1b1f;
+  --kf-card-hover: #202025;
+  --kf-border: #2c2c32;
+  --kf-border-strong: #3a3a40;
+
+  /* Text */
+  --kf-text: #ffffff;
+  --kf-text-2: #d4d4d8;
+  --kf-muted: #a3a3aa;
+  --kf-muted-2: #6e6e76;
+
+  /* Akzente (DKFV) */
+  --kf-gold: #ffd400;
+  --kf-gold-hover: #ffe24d;
+  --kf-gold-fg: #0a0a0b;
+  --kf-red: #e30613;
+  --kf-red-hover: #ff2a36;
+
+  /* Semantik */
+  --kf-positive: #35c76a;
+  --kf-negative: #e30613;
+  --kf-warning: #ffb020;
+  --kf-info: #4da3ff;
+
+  /* Spielfeld */
+  --kf-pitch: #0e1a12;
+  --kf-pitch-line: rgba(255, 255, 255, 0.18);
+
+  /* Wettbewerbsakzent – wird pro Season per Inline-Style überschrieben */
+  --season-accent: var(--kf-gold);
+  --season-accent-fg: var(--kf-gold-fg);
+
+  /* Radius, Schatten, Motion */
+  --kf-radius-sm: 4px;
+  --kf-radius: 6px;
+  --kf-radius-lg: 10px;
+  --kf-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+  --kf-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --kf-dur-fast: 120ms;
+  --kf-dur: 220ms;
+}
+
+@theme inline {
+  --color-ground: var(--kf-ground);
+  --color-surface: var(--kf-surface);
+  --color-card: var(--kf-card);
+  --color-card-hover: var(--kf-card-hover);
+  --color-border: var(--kf-border);
+  --color-border-strong: var(--kf-border-strong);
+  --color-text: var(--kf-text);
+  --color-text-2: var(--kf-text-2);
+  --color-muted: var(--kf-muted);
+  --color-muted-2: var(--kf-muted-2);
+  --color-gold: var(--kf-gold);
+  --color-gold-hover: var(--kf-gold-hover);
+  --color-gold-fg: var(--kf-gold-fg);
+  --color-red: var(--kf-red);
+  --color-red-hover: var(--kf-red-hover);
+  --color-positive: var(--kf-positive);
+  --color-negative: var(--kf-negative);
+  --color-warning: var(--kf-warning);
+  --color-info: var(--kf-info);
+  --color-pitch: var(--kf-pitch);
+  --color-accent: var(--season-accent);
+  --color-accent-fg: var(--season-accent-fg);
+
+  --font-sans: var(--font-saira), system-ui, sans-serif;
+  --font-display: var(--font-saira-condensed), var(--font-saira), system-ui, sans-serif;
+
+  --radius-sm: var(--kf-radius-sm);
+  --radius: var(--kf-radius);
+  --radius-lg: var(--kf-radius-lg);
+
+  --shadow-kf: var(--kf-shadow);
+
+  --breakpoint-xs: 360px;
+}
+
+html {
+  min-height: 100%;
+}
+body {
+  min-height: 100dvh;
+}
+
+body {
+  background: var(--kf-ground);
+  color: var(--kf-text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Display-Typografie: kursiv, schwer, Versalien – nach Vorbild der DKFV-Wortmarke */
+.display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-style: italic;
+  text-transform: uppercase;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+}
+.display-upright {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 0.95;
+}
+/* Zahlen: aufrecht, tabellarisch */
+.num {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.eyebrow {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--kf-gold);
+}
+
+/* Tricolore-Signatur */
+.tricolore {
+  background: linear-gradient(90deg, var(--kf-ground) 0 33.3%, var(--kf-red) 33.3% 66.6%, var(--kf-gold) 66.6%);
+}
+.tricolore-skew {
+  background: linear-gradient(100deg, var(--kf-ground) 0 33%, var(--kf-red) 33% 66%, var(--kf-gold) 66%);
+  transform: skewX(-18deg);
+  border: 1px solid var(--kf-border);
+}
+
+/* Skew-Button */
+.skew {
+  transform: skewX(-10deg);
+}
+.skew > * {
+  display: inline-block;
+  transform: skewX(10deg);
+}
+
+/* Scrollbar dezent */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--kf-border-strong) transparent;
+}
+
+/* Safe-Area für Bottom Nav */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 12px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
