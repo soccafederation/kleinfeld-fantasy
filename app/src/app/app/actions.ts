@@ -27,7 +27,7 @@ export type SaveRosterResult = {
 
 export async function saveRosterAction(input: { seasonId: string; teamName: string; players: RosterInput[]; captain: string | null; dryRun?: boolean }): Promise<SaveRosterResult> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("save_roster", {
+  const { data, error } = await supabase.rpc("save_roster_guarded", {
     p_season_id: input.seasonId,
     p_team_name: input.teamName,
     p_players: input.players,

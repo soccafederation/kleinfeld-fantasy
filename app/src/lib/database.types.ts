@@ -1455,6 +1455,10 @@ export type Database = {
         Args: { p_round_id: string }
         Returns: Json
       }
+      lock_round_internal: {
+        Args: { p_round_id: string }
+        Returns: Json
+      }
       my_rank: {
         Args: { p_season_id: string }
         Returns: Json
@@ -1476,6 +1480,10 @@ export type Database = {
         Returns: { rank: number; points: number; fantasy_team_id: string; team_name: string; username: string; is_me: boolean }[]
       }
       save_roster: {
+        Args: { p_season_id: string; p_team_name: string; p_players: Json; p_captain: string; p_dry_run?: boolean }
+        Returns: Json
+      }
+      save_roster_guarded: {
         Args: { p_season_id: string; p_team_name: string; p_players: Json; p_captain: string; p_dry_run?: boolean }
         Returns: Json
       }
