@@ -340,6 +340,7 @@ export type Database = {
           total_points: number
           status: Database["public"]["Enums"]["score_status"]
           computed_at: string
+          auto_subs: Json
         }
         Insert: {
           id?: string
@@ -353,6 +354,7 @@ export type Database = {
           total_points?: number
           status?: Database["public"]["Enums"]["score_status"]
           computed_at?: string
+          auto_subs?: Json
         }
         Update: {
           id?: string
@@ -366,6 +368,7 @@ export type Database = {
           total_points?: number
           status?: Database["public"]["Enums"]["score_status"]
           computed_at?: string
+          auto_subs?: Json
         }
         Relationships: [
           { foreignKeyName: "fantasy_team_scores_fantasy_team_id_fkey"; columns: ["fantasy_team_id"]; isOneToOne: false; referencedRelation: "fantasy_teams"; referencedColumns: ["id"] },
@@ -1447,6 +1450,10 @@ export type Database = {
         Args: { p_league_id: string }
         Returns: { rank: number; total_points: number; last_round_points: number; fantasy_team_id: string; team_name: string; username: string; is_me: boolean }[]
       }
+      lineup_counting_players: {
+        Args: { p_lineup_id: string; p_round_id: string; p_bench_counts: boolean; p_auto_sub: boolean }
+        Returns: { season_player_id: string; replaced_player_id: string }[]
+      }
       lock_due_rounds: {
         Args: Record<string, never>
         Returns: number
@@ -1466,6 +1473,10 @@ export type Database = {
       next_open_round: {
         Args: { p_season_id: string }
         Returns: unknown
+      }
+      player_played_in_round: {
+        Args: { p_season_player_id: string; p_round_id: string }
+        Returns: boolean
       }
       publish_round_stats: {
         Args: { p_round_id: string }

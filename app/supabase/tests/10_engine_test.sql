@@ -202,6 +202,31 @@ begin
   perform t_assert((v_res->>'ok')::boolean = false and v_res->>'blocked_reason' like '%mehrere Spieltage%', 'Snapshot-Lücke (R1 → R3) wird blockiert');
 end $$;
 
+-- ── Automatisches Nachrücken ──────────────────────────────────────────────
+set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000009';
+do $$
+declare v_r1 uuid; v_out uuid; v_team uuid; v_before numeric; v_after numeric;
+begin
+  select id into v_r1 from fantasy_rounds where number = 1;
+  select id into v_team from fantasy_teams where name = 'Hauptstadt XI';
+  select total_points into v_before from fantasy_team_scores where fantasy_team_id = v_team and round_id = v_r1;
+  -- ein Feld-Starter von B (nicht Kapitän) hat nicht gespielt
+  select lp.season_player_id into v_out from fantasy_lineup_players lp join fantasy_lineups l on l.id = lp.lineup_id
+  where l.fantasy_team_id = v_team and l.round_id = v_r1 and lp.slot = 'FIELD'
+    and lp.season_player_id <> (select captain_season_player_id from fantasy_teams where id = v_team)
+    limit 1;
+  delete from player_round_statistics where round_id = v_r1 and season_player_id = v_out;
+  perform compute_round(v_r1, true);
+  select total_points into v_after from fantasy_team_scores where fantasy_team_id = v_team and round_id = v_r1;
+  perform t_assert(v_after = v_before and jsonb_array_length((select auto_subs from fantasy_team_scores where fantasy_team_id = v_team and round_id = v_r1)) = 1,
+    format('Auto-Sub: Bankspieler rückt für Nichtspieler nach (%s → %s Punkte, 1 Wechsel)', v_before, v_after));
+  update seasons set rules = rules || '{"auto_sub": false}'::jsonb;
+  perform compute_round(v_r1, true);
+  perform t_assert((select total_points from fantasy_team_scores where fantasy_team_id = v_team and round_id = v_r1) = v_before - 1.5,
+    'Ohne Auto-Sub: Nichtspieler bringt 0 Punkte');
+  update seasons set rules = rules - 'auto_sub';
+end $$;
+
 -- ── Datenexport ───────────────────────────────────────────────────────────
 set local request.jwt.claim.sub = '00000000-0000-0000-0000-000000000001';
 select t_assert((export_my_data()->'teams')::text like '%Kennedyplatz Kings%', 'Datenexport enthält eigenes Team');

@@ -14,7 +14,7 @@ export default async function TermsPage() {
       <h2>Spielregeln (aktuell gültig)</h2>
       <ul>
         <li>Budget: {r.budget_m} Mio. Fantasy Credits je Wettbewerb.</li>
-        <li>Kader: {r.squad.GK} Torwart, {r.squad.FIELD} Feldspieler, {r.squad.BENCH} Ersatzspieler. Ersatzspieler erzielen {r.bench_counts ? "" : "keine "}Punkte.</li>
+        <li>Kader: {r.squad.GK} Torwart, {r.squad.FIELD} Feldspieler, {r.squad.BENCH} Ersatzspieler. {r.bench_counts ? "Ersatzspieler punkten mit." : r.auto_sub ? "Spielt ein Starter an einem Spieltag nicht, rückt automatisch der erste passende Ersatzspieler nach, der gespielt hat (Torwart nur für Torwart). Spielt der Kapitän nicht, entfällt der Kapitänsbonus." : "Ersatzspieler erzielen keine Punkte."}</li>
         <li>Maximal {r.max_per_club} Spieler eines realen Teams.</li>
         <li>Kapitän: Punkte zählen {r.captain_multiplier}-fach. Die Kapitänswahl ist bis zur Deadline änderbar.</li>
         <li>Transfers: {r.transfers.free_per_round} kostenlose Transfers pro Spieltag, danach −{r.transfers.penalty_points} Punkte je weiterem Transfer (maximal {r.transfers.max_extra} weitere). Nicht genutzte Transfers verfallen{r.transfers.carry_over ? " nicht" : ""}.</li>
