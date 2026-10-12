@@ -32,6 +32,11 @@
   --kf-warning: #ffb020;
   --kf-info: #4da3ff;
 
+  /* Signatur-Streifen (DKFV-Tricolore, pro Wettbewerb überschreibbar) */
+  --kf-stripe-1: var(--kf-ground);
+  --kf-stripe-2: var(--kf-red);
+  --kf-stripe-3: var(--kf-gold);
+
   /* Spielfeld */
   --kf-pitch: #0e1a12;
   --kf-pitch-line: rgba(255, 255, 255, 0.18);
@@ -134,10 +139,10 @@ body {
 
 /* Tricolore-Signatur */
 .tricolore {
-  background: linear-gradient(90deg, var(--kf-ground) 0 33.3%, var(--kf-red) 33.3% 66.6%, var(--kf-gold) 66.6%);
+  background: linear-gradient(90deg, var(--kf-stripe-1) 0 33.3%, var(--kf-stripe-2) 33.3% 66.6%, var(--kf-stripe-3) 66.6%);
 }
 .tricolore-skew {
-  background: linear-gradient(100deg, var(--kf-ground) 0 33%, var(--kf-red) 33% 66%, var(--kf-gold) 66%);
+  background: linear-gradient(100deg, var(--kf-stripe-1) 0 33%, var(--kf-stripe-2) 33% 66%, var(--kf-stripe-3) 66%);
   transform: skewX(-18deg);
   border: 1px solid var(--kf-border);
 }

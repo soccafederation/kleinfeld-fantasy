@@ -59,7 +59,7 @@ export function Pitch({
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
-      <div className="relative overflow-hidden rounded-lg border border-[#1e3327] bg-pitch" style={{ minHeight: compact ? 220 : 300 }}>
+      <div className="relative overflow-hidden rounded-lg border border-white/10 bg-pitch" style={{ minHeight: compact ? 220 : 300 }}>
         {/* Linien */}
         <div aria-hidden className="pointer-events-none absolute inset-3 rounded-[3px] border border-white/15" />
         <div aria-hidden className="pointer-events-none absolute left-3 right-3 top-1/2 h-px bg-white/15" />
