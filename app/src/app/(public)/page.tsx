@@ -6,9 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/lib/supabase/server";
 import { formatDateTime, formatPoints, initials } from "@/lib/utils";
 import { parseSeasonRules } from "@/lib/rules";
+import { redirect } from "next/navigation";
+import { REGISTRATION_OPEN } from "@/lib/config";
 
 export default async function LandingPage() {
   const supabase = await createClient();
+  if (!REGISTRATION_OPEN) {
+    // Geschlossene Runde: keine öffentliche Startseite
+    const { data: { user } } = await supabase.auth.getUser();
+    redirect(user ? "/app" : "/login");
+  }
   const [{ data: seasons }, { data: comps }, { data: prizes }] = await Promise.all([
     supabase.from("seasons").select("*, competition:competitions(*)").in("status", ["open", "live"]).order("created_at"),
     supabase.from("competitions").select("*").eq("is_active", true).order("sort_order"),

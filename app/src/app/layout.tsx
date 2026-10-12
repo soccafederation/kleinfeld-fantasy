@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { REGISTRATION_OPEN } from "@/lib/config";
 
 // Selbst gehostet (DSGVO: keine Anfragen an Google Fonts). Quelle: Saira (OFL), via Fontsource.
 const saira = localFont({
@@ -31,6 +32,7 @@ export const metadata: Metadata = {
   description:
     "Stell dein Fantasy-Team aus den besten Kleinfeldfußballern zusammen, sammle Punkte mit echten Spielerleistungen und kämpfe um die Spitze der Rangliste.",
   applicationName: "Kleinfeld Fantasy",
+  robots: REGISTRATION_OPEN ? undefined : { index: false, follow: false },
   manifest: "/manifest.webmanifest",
   appleWebApp: { capable: true, title: "Kleinfeld Fantasy", statusBarStyle: "black-translucent" },
 };

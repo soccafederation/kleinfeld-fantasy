@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { REGISTRATION_OPEN } from "@/lib/config";
 
 const USERNAME_RE = /^[A-Za-z0-9_.-]{3,20}$/;
 
@@ -25,6 +26,7 @@ function siteUrl() {
 }
 
 export async function registerAction(_prev: AuthState, formData: FormData): Promise<AuthState> {
+  if (!REGISTRATION_OPEN) return { error: "Die Registrierung ist geschlossen. Zugang nur auf Einladung." };
   const parsed = registerSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) {
     const fe: Record<string, string> = {};
