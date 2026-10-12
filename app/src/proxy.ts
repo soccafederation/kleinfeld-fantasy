@@ -27,9 +27,9 @@ export async function proxy(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Lokale JWT-Prüfung (frischt die Session bei Bedarf auf), kein Roundtrip pro Seitenaufruf.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims?.sub ? { id: data.claims.sub } : null;
 
   const { pathname } = request.nextUrl;
   const isProtected = pathname.startsWith("/app") || pathname.startsWith("/admin");

@@ -1,11 +1,11 @@
 import "server-only";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { getMyTeam, getSeasonContext, resolveActiveSeason } from "@/lib/data/season";
+import { getMyTeam, getSeasonContext, listSeasons, resolveActiveSeason } from "@/lib/data/season";
 
 /** Standard-Kontext für alle /app-Seiten: Nutzer, aktive Season, Regeln, eigenes Team. */
 export async function getAppContext() {
-  const { user, profile } = await requireUser();
+  const [{ user, profile }] = await Promise.all([requireUser(), listSeasons()]);
   const season = await resolveActiveSeason(profile.active_season_id);
   if (!season) return { user, profile, season: null, ctx: null, myTeam: null };
   const [ctx, myTeam] = await Promise.all([getSeasonContext(season.id), getMyTeam(season.id, user.id)]);

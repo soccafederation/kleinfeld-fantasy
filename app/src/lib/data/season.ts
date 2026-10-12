@@ -120,17 +120,20 @@ export type MyTeam = {
 
 export const getMyTeam = cache(async (seasonId: string, userId: string): Promise<MyTeam | null> => {
   const supabase = await createClient();
-  const { data: team } = await supabase.from("fantasy_teams").select("*").eq("season_id", seasonId).eq("user_id", userId).maybeSingle();
-  if (!team) return null;
-  const [players, { data: roster }, ctx] = await Promise.all([
+  // Team, Spieler und Season-Kontext parallel – danach Kader + Transfers parallel.
+  const [{ data: team }, players, ctx] = await Promise.all([
+    supabase.from("fantasy_teams").select("*").eq("season_id", seasonId).eq("user_id", userId).maybeSingle(),
     getSeasonPlayers(seasonId),
-    supabase.from("fantasy_rosters").select("*").eq("fantasy_team_id", team.id).order("slot_order"),
     getSeasonContext(seasonId),
   ]);
+  if (!team) return null;
+  const [{ data: roster }, { data: transfers }] = await Promise.all([
+    supabase.from("fantasy_rosters").select("*").eq("fantasy_team_id", team.id).order("slot_order"),
+    ctx?.nextRound
+      ? supabase.from("fantasy_transfers").select("*").eq("fantasy_team_id", team.id).eq("round_id", ctx.nextRound.id)
+      : Promise.resolve({ data: [] as Tables<"fantasy_transfers">[] }),
+  ]);
   const map = new Map(players.map((p) => [p.id, p]));
-  const { data: transfers } = ctx?.nextRound
-    ? await supabase.from("fantasy_transfers").select("*").eq("fantasy_team_id", team.id).eq("round_id", ctx.nextRound.id)
-    : { data: [] as Tables<"fantasy_transfers">[] };
   return {
     team,
     roster: (roster ?? []).filter((r) => map.has(r.season_player_id)).map((r) => ({ ...r, player: map.get(r.season_player_id)! })),
