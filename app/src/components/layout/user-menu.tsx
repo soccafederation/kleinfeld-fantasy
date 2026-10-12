@@ -35,7 +35,7 @@ export function UserMenu({ initials, username, isStaff }: { initials: string; us
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label="Benutzermenü"
-        className="num flex h-9 w-9 items-center justify-center bg-gold text-sm text-gold-fg skew"
+        className="num flex h-9 w-9 cursor-pointer items-center justify-center bg-gold text-sm text-gold-fg outline outline-1 outline-offset-2 outline-transparent transition skew hover:bg-text hover:outline-border-strong aria-expanded:bg-text aria-expanded:outline-border-strong"
       >
         <span>{initials}</span>
       </button>
