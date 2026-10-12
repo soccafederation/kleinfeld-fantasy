@@ -25,8 +25,11 @@ export function AppShell({
       <header className="sticky top-0 z-30 border-b border-border bg-ground/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4">
           <div className="flex items-center gap-3">
-            <Link href="/app" className="display hidden text-xl md:block">
+            <Link href="/app/competitions" className="display hidden text-xl md:block" title="Alle Wettbewerbe">
               Kleinfeld <span className="text-gold">Fantasy</span>
+            </Link>
+            <Link href="/app/competitions" aria-label="Alle Wettbewerbe" className="display flex h-8 w-8 items-center justify-center border border-border-strong text-sm md:hidden">
+              K<span className="text-gold">F</span>
             </Link>
             <span className="hidden h-6 w-px bg-border md:block" />
             {season ? <SeasonSwitcher current={season} seasons={seasons} /> : <span className="display text-lg"><Stripe className="mr-2" />Kleinfeld Fantasy</span>}
