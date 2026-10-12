@@ -6,8 +6,7 @@ import { SeasonSwitcher } from "./season-switcher";
 import type { Season } from "@/lib/data/season";
 import type { Profile } from "@/lib/auth";
 import { initials } from "@/lib/utils";
-import { LogOut } from "lucide-react";
-import { signOutAction } from "@/app/app/actions";
+import { UserMenu } from "./user-menu";
 
 export function AppShell({
   children,
@@ -43,15 +42,7 @@ export function AppShell({
                 Admin
               </Link>
             )}
-            <Link href="/app/profile" aria-label="Profil" className="num flex h-9 w-9 items-center justify-center bg-gold text-gold-fg text-sm skew">
-              <span>{initials(profile.display_name ?? profile.username)}</span>
-            </Link>
-            <form action={signOutAction}>
-              <button type="submit" aria-label="Abmelden" title="Abmelden" className="flex h-9 items-center gap-1.5 rounded-sm border border-border-strong px-2 text-[11px] font-semibold uppercase tracking-wider text-text-2 hover:text-text">
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Abmelden</span>
-              </button>
-            </form>
+            <UserMenu initials={initials(profile.display_name ?? profile.username)} username={profile.username} isStaff={isStaff} />
           </div>
         </div>
       </header>
