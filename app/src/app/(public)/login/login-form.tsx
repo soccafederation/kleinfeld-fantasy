@@ -14,8 +14,8 @@ export function LoginForm({ next, linkError }: { next?: string; linkError?: bool
       {linkError && <Notice kind="error">Der Link ist ungültig oder abgelaufen. Bitte neu anfordern.</Notice>}
       {state?.error && <Notice kind="error">{state.error}</Notice>}
       <div>
-        <Label htmlFor="email">E-Mail</Label>
-        <Input id="email" name="email" type="email" autoComplete="email" required />
+        <Label htmlFor="email">E-Mail oder Benutzername</Label>
+        <Input id="email" name="email" type="text" autoComplete="username" autoCapitalize="none" required />
       </div>
       <div>
         <div className="flex items-center justify-between">

@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const USERNAME_RE = /^[A-Za-z0-9_.-]{3,20}$/;
 
@@ -52,15 +53,25 @@ export async function registerAction(_prev: AuthState, formData: FormData): Prom
 }
 
 export async function loginAction(_prev: AuthState, formData: FormData): Promise<AuthState> {
-  const email = String(formData.get("email") ?? "").trim();
+  const identifier = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const next = String(formData.get("next") ?? "/app");
-  if (!email || !password) return { error: "Bitte E-Mail und Passwort eingeben." };
+  if (!identifier || !password) return { error: "Bitte E-Mail oder Benutzername und Passwort eingeben." };
   const supabase = await createClient();
+
+  // Login per Benutzername: E-Mail wird serverseitig aufgelöst und nie an den Browser gegeben.
+  let email = identifier;
+  if (!identifier.includes("@")) {
+    const admin = createAdminClient();
+    const { data: profile } = await admin.from("profiles").select("user_id").eq("username", identifier).maybeSingle();
+    const resolved = profile ? (await admin.auth.admin.getUserById(profile.user_id)).data.user?.email : null;
+    if (!resolved) return { error: "E-Mail/Benutzername oder Passwort ist falsch." };
+    email = resolved;
+  }
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) {
     if (error.message.toLowerCase().includes("email not confirmed")) return { error: "Bitte bestätige zuerst deine E-Mail-Adresse. Wir haben dir einen Link geschickt." };
-    return { error: "E-Mail oder Passwort ist falsch." };
+    return { error: "E-Mail/Benutzername oder Passwort ist falsch." };
   }
   redirect(next.startsWith("/") ? next : "/app");
 }
