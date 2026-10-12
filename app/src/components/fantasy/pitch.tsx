@@ -36,23 +36,26 @@ export function Pitch({
   pointsLabel?: string;
   className?: string;
 }) {
-  const gk = players.filter((p) => p.slot === "GK").sort((a, b) => a.slotOrder - b.slotOrder);
-  const field = players.filter((p) => p.slot === "FIELD").sort((a, b) => a.slotOrder - b.slotOrder);
-  const bench = players.filter((p) => p.slot === "BENCH").sort((a, b) => a.slotOrder - b.slotOrder);
-  const nGK = emptySlots?.GK ?? Math.max(1, gk.length);
-  const nField = emptySlots?.FIELD ?? Math.max(4, field.length);
-  const nBench = emptySlots?.BENCH ?? Math.max(2, bench.length);
+  const of = (slot: PitchPlayer["slot"]) => players.filter((p) => p.slot === slot);
+  const gkAll = of("GK");
+  const fieldAll = of("FIELD");
+  const benchAll = of("BENCH");
+  const nGK = emptySlots?.GK ?? Math.max(1, gkAll.length);
+  const nField = emptySlots?.FIELD ?? Math.max(4, fieldAll.length);
+  const nBench = emptySlots?.BENCH ?? Math.max(2, benchAll.length);
+  // Jeder Spieler steht auf dem Platz mit seinem slotOrder (0-basiert) – so passt der angetippte
+  // Platz immer zu dem Platz, auf den der Team Builder setzt. Ausreißer füllen freie Plätze auf.
+  const gk = placeBySlotOrder(gkAll, nGK);
+  const field = placeBySlotOrder(fieldAll, nField);
+  const bench = placeBySlotOrder(benchAll, nBench);
 
   const slotEl = (slot: "GK" | "FIELD" | "BENCH", i: number, p?: PitchPlayer) => {
     if (renderAction) return <div key={`${slot}-${i}`}>{renderAction(slot, i, p)}</div>;
     return <PitchSlot key={`${slot}-${i}`} player={p} compact={compact} pointsLabel={pointsLabel} />;
   };
 
-  const fieldRows = nField <= 4 ? [field.slice(0, 2), field.slice(2, 4)] : [field.slice(0, 3), field.slice(3)];
-  const fieldSlots = Array.from({ length: nField }, (_, i) => field[i]);
-  const rowTop = fieldSlots.slice(0, Math.ceil(nField / 2));
-  const rowBottom = fieldSlots.slice(Math.ceil(nField / 2));
-  void fieldRows;
+  const rowTop = field.slice(0, Math.ceil(nField / 2));
+  const rowBottom = field.slice(Math.ceil(nField / 2));
 
   return (
     <div className={cn("flex flex-col gap-3", className)}>
@@ -76,6 +79,20 @@ export function Pitch({
       </div>
     </div>
   );
+}
+
+function placeBySlotOrder(list: PitchPlayer[], n: number): (PitchPlayer | undefined)[] {
+  const out: (PitchPlayer | undefined)[] = Array.from({ length: Math.max(n, list.length) }, () => undefined);
+  const rest: PitchPlayer[] = [];
+  for (const p of [...list].sort((a, b) => a.slotOrder - b.slotOrder)) {
+    if (p.slotOrder >= 0 && p.slotOrder < out.length && !out[p.slotOrder]) out[p.slotOrder] = p;
+    else rest.push(p);
+  }
+  for (const p of rest) {
+    const free = out.findIndex((x) => !x);
+    if (free >= 0) out[free] = p;
+  }
+  return out;
 }
 
 export function PitchSlot({ player, compact, pointsLabel = "PTS", onClick }: { player?: PitchPlayer; compact?: boolean; pointsLabel?: string; onClick?: () => void }) {
