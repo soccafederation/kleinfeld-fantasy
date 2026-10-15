@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Shirt, Store, BarChart3, UserRound, Users, Shield } from "lucide-react";
+import { LayoutDashboard, Shirt, Store, BarChart3, UserRound, Users, Shield, CircleHelp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
@@ -46,7 +46,7 @@ export function BottomNav() {
 
 export function SideNav({ isStaff }: { isStaff: boolean }) {
   const pathname = usePathname();
-  const items = [...ITEMS, { href: "/app/leagues", label: "Private Ligen", icon: Users }];
+  const items = [...ITEMS, { href: "/app/leagues", label: "Private Ligen", icon: Users }, { href: "/app/faq", label: "FAQ", icon: CircleHelp }];
   return (
     <aside className="hidden w-52 shrink-0 md:block">
       <nav aria-label="Hauptnavigation" className="sticky top-20 flex flex-col gap-1">

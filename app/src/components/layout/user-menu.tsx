@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { LayoutGrid, LogOut, Shield, UserRound } from "lucide-react";
+import { CircleHelp, LayoutGrid, LogOut, Shield, UserRound } from "lucide-react";
 import { signOutAction } from "@/app/app/actions";
 
 /** Profil-Kürzel im Header; Klick öffnet ein kleines Menü mit Profil, Wettbewerben, Admin und Abmelden. */
@@ -49,6 +49,9 @@ export function UserMenu({ initials, username, isStaff }: { initials: string; us
           </Link>
           <Link href="/app/competitions" role="menuitem" className={item} onClick={close}>
             <LayoutGrid className="h-4 w-4" /> Alle Wettbewerbe
+          </Link>
+          <Link href="/app/faq" role="menuitem" className={item} onClick={close}>
+            <CircleHelp className="h-4 w-4" /> FAQ & Regeln
           </Link>
           {isStaff && (
             <Link href="/admin" role="menuitem" className={item} onClick={close}>
