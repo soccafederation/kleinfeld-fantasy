@@ -106,7 +106,7 @@ export default async function FaqPage() {
       items: [
         { q: "Wie ändere ich mein Passwort?", a: <>Oben rechts auf dein Kürzel tippen → Profil.</> },
         { q: "Ich habe mein Passwort vergessen.", a: <>Melde dich bei Christoph, er setzt es dir neu.</> },
-        { q: "Kann ich in mehreren Wettbewerben spielen?", a: <>Ja. Oben links auf „Kleinfeld Fantasy" tippen – dort siehst du alle Wettbewerbe und wechselst zwischen ihnen.</> },
+        { q: "Kann ich in mehreren Wettbewerben spielen?", a: <>Ja. Oben links auf „Kleinfeld Fantasy“ tippen – dort siehst du alle Wettbewerbe und wechselst zwischen ihnen.</> },
       ],
     },
   ];
