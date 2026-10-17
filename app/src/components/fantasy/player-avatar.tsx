@@ -25,7 +25,7 @@ export function PlayerAvatar({
       style={{ width: size, height: size }}
     >
       {imageUrl ? (
-        <Image src={imageUrl} alt="" width={size} height={size} className="h-full w-full rounded-[2px] object-cover" />
+        <Image src={imageUrl} alt="" width={size} height={size} className="h-full w-full rounded-[2px] object-cover object-top" />
       ) : (
         <span className="num text-text-2" style={{ fontSize: Math.max(11, size * 0.36) }}>
           {initials(name)}

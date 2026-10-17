@@ -17,6 +17,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "*.supabase.co" },
       { protocol: "https", hostname: "*.supabase.in" },
+      // Spielerfotos und Wappen der Icon League (Contentful)
+      { protocol: "https", hostname: "images.ctfassets.net" },
     ],
   },
 };
