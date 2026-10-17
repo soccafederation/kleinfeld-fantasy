@@ -86,7 +86,7 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
 async function OverallTable({ seasonId, from, to, highlightTeam }: { seasonId: string; from: number; to: number; highlightTeam?: string }) {
   const supabase = await createClient();
   const { data } = await supabase.rpc("leaderboard_window", { p_season_id: seasonId, p_from: from, p_to: to });
-  if (!data?.length) return <Card className="px-4 py-10 text-center text-muted">Die Rangliste füllt sich nach dem ersten gewerteten Spieltag.</Card>;
+  if (!data?.length) return <Participants seasonId={seasonId} highlightTeam={highlightTeam} />;
   return (
     <Card className="overflow-hidden">
       <div className="grid grid-cols-[44px_1fr_64px_76px] items-center gap-2 bg-[#0f0f11] px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-muted sm:grid-cols-[56px_1fr_90px_90px_100px]">
@@ -236,6 +236,56 @@ function Pagination({ page, pages, view, extra = "" }: { page: number; pages: nu
       <Link aria-disabled={page <= 1} className={cn("font-bold uppercase tracking-wide", page <= 1 ? "pointer-events-none text-muted-2" : "text-gold")} href={`/app/leaderboard?view=${view}&page=${page - 1}${extra}`}>← Zurück</Link>
       <span className="text-muted">Seite {page} von {pages}</span>
       <Link aria-disabled={page >= pages} className={cn("font-bold uppercase tracking-wide", page >= pages ? "pointer-events-none text-muted-2" : "text-gold")} href={`/app/leaderboard?view=${view}&page=${page + 1}${extra}`}>Weiter →</Link>
+    </div>
+  );
+}
+
+/** Vor dem ersten gewerteten Spieltag: wer spielt mit? (Teamnamen öffentlich, Kader bleiben privat) */
+async function Participants({ seasonId, highlightTeam }: { seasonId: string; highlightTeam?: string }) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("fantasy_teams")
+    .select("id, name, is_complete, created_at, profile:profiles(username)")
+    .eq("season_id", seasonId)
+    .order("is_complete", { ascending: false })
+    .order("created_at", { ascending: true });
+  const teams = (data ?? []) as unknown as Array<{ id: string; name: string; is_complete: boolean; profile: { username: string } | null }>;
+  const ready = teams.filter((t) => t.is_complete).length;
+  if (!teams.length) return <Card className="px-4 py-10 text-center text-muted">Noch kein Team angelegt – sei der Erste.</Card>;
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-sm text-text-2">
+        <span className="num text-text">{teams.length}</span> Teilnehmer · <span className="num text-text">{ready}</span> mit fertigem Team. Punkte und Platzierungen gibt es nach dem ersten Spieltag – die Kader bleiben bis zur Deadline geheim.
+      </p>
+      <Card className="overflow-hidden">
+        <div className="grid grid-cols-[44px_1fr_auto] items-center gap-2 bg-surface px-3 py-2 text-[10px] uppercase tracking-[0.14em] text-muted sm:grid-cols-[56px_1fr_auto]">
+          <span>#</span><span>Manager · Team</span><span className="text-right">Status</span>
+        </div>
+        {teams.map((t, i) => {
+          const me = t.id === highlightTeam;
+          return (
+            <div
+              key={t.id}
+              className={cn(
+                "grid grid-cols-[44px_1fr_auto] items-center gap-2 border-t border-border border-l-[6px] px-3 py-2.5 sm:grid-cols-[56px_1fr_auto]",
+                me ? "border-l-gold bg-gold/10" : "border-l-transparent",
+              )}
+            >
+              <span className="num text-xl text-muted">{i + 1}</span>
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span className="num hidden h-8 w-8 shrink-0 items-center justify-center bg-surface text-[11px] sm:flex">{initials(t.profile?.username ?? "?")}</span>
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-bold">{me ? "Du" : (t.profile?.username ?? "–")}</div>
+                  <div className="truncate text-xs text-muted">{t.name}</div>
+                </div>
+              </div>
+              <span className={cn("text-right text-[11px] font-semibold uppercase tracking-wider", t.is_complete ? "text-positive" : "text-muted")}>
+                {t.is_complete ? "Team steht" : "Baut noch"}
+              </span>
+            </div>
+          );
+        })}
+      </Card>
     </div>
   );
 }
