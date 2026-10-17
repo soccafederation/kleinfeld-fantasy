@@ -6,7 +6,7 @@ export const seasonRulesSchema = z.object({
   squad: z.object({ GK: z.number().int().min(0).default(1), FIELD: z.number().int().min(0).default(4), BENCH: z.number().int().min(0).default(2) }).default({ GK: 1, FIELD: 4, BENCH: 2 }),
   bench_counts: z.boolean().default(false),
   auto_sub: z.boolean().default(true),
-  max_per_club: z.number().int().min(1).default(3),
+  max_per_club: z.number().int().min(1).default(2),
   captain_multiplier: z.number().default(2),
   transfers: z
     .object({

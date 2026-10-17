@@ -66,7 +66,7 @@ export function isDraftComplete(d: Draft, rules: SeasonRules) {
   return m.GK === 0 && m.FIELD === 0 && m.BENCH === 0;
 }
 
-export type Eligibility = { ok: true } | { ok: false; reason: string };
+export type Eligibility = { ok: true } | { ok: false; reason: string; detail?: string };
 
 /**
  * Prüft, ob ein Spieler in einen Slot gesetzt werden kann. Der Spieler, der dort aktuell steht
@@ -89,10 +89,14 @@ export function eligibility(
   }
   const spent = totalValue(d, byId) - (replacing ? (byId.get(replacing)?.market_value_m ?? 0) : 0);
   const remaining = rules.budget_m - spent;
-  if (player.market_value_m > remaining + 1e-9) return { ok: false, reason: "Zu teuer" };
+  if (player.market_value_m > remaining + 1e-9) return { ok: false, reason: "Zu teuer", detail: `Dafür reicht dein Budget nicht – auf diesem Platz sind noch ${remaining.toLocaleString("de-DE", { maximumFractionDigits: 1 })} Mio. frei.` };
   const clubs = clubCounts(d, byId, replacing);
   if ((clubs.get(player.team.club.id) ?? 0) >= rules.max_per_club) {
-    return { ok: false, reason: `Max. ${rules.max_per_club} pro Team` };
+    return {
+      ok: false,
+      reason: `Max. ${rules.max_per_club} pro Team`,
+      detail: `Du hast bereits ${rules.max_per_club} Spieler von ${player.team.club.name} im Kader. Mehr als ${rules.max_per_club} Spieler aus einem Team sind nicht erlaubt.`,
+    };
   }
   return { ok: true };
 }

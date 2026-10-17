@@ -24,6 +24,7 @@ export function StatusBadge({ status, className }: { status: PlayerRow["status"]
 export function PlayerCard({
   player,
   onClick,
+  onDisabledClick,
   disabled,
   disabledReason,
   selected,
@@ -33,6 +34,8 @@ export function PlayerCard({
 }: {
   player: PlayerRow;
   onClick?: () => void;
+  /** Klick auf eine gesperrte Karte (z. B. um den Grund als Hinweis anzuzeigen). */
+  onDisabledClick?: () => void;
   disabled?: boolean;
   disabledReason?: string;
   selected?: boolean;
@@ -79,7 +82,13 @@ export function PlayerCard({
   );
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} disabled={disabled} aria-disabled={disabled} className={cn(cls, "disabled:cursor-not-allowed")}>
+      <button
+        type="button"
+        onClick={disabled ? onDisabledClick : onClick}
+        disabled={disabled && !onDisabledClick}
+        aria-disabled={disabled}
+        className={cn(cls, disabled && "cursor-not-allowed")}
+      >
         {inner}
       </button>
     );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Search } from "lucide-react";
+import { AlertTriangle, Search, X } from "lucide-react";
 import { Input, Select } from "@/components/ui/input";
 import { PlayerCard } from "@/components/fantasy/player-card";
 import { Sheet } from "./sheet";
@@ -45,6 +45,7 @@ export function PlayerPicker({
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("total_points");
   const [club, setClub] = useState<string>("all");
+  const [blocked, setBlocked] = useState<string | null>(null);
 
   const replacing = useMemo(() => {
     if (!slotRef) return null;
@@ -77,8 +78,22 @@ export function PlayerPicker({
   const title = slotRef.slot === "BENCH" ? `Bank ${slotRef.index + 1}` : slotRef.slot === "GK" ? SLOT_LABEL.GK : `${SLOT_LABEL.FIELD} ${slotRef.index + 1}`;
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange} title={title} description={`Noch ${formatMillions(remaining)} Budget für diesen Platz`}>
+    <Sheet
+      open={open}
+      onOpenChange={(o) => {
+        if (!o) setBlocked(null);
+        onOpenChange(o);
+      }} title={title} description={`Noch ${formatMillions(remaining)} Budget für diesen Platz`}>
       <div className="sticky top-0 z-10 -mx-4 space-y-2 bg-card px-4 pb-3">
+        {blocked && (
+          <div role="alert" className="flex items-start gap-2 rounded border border-red/50 bg-red/10 p-3 text-sm">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-red" />
+            <p className="flex-1">{blocked}</p>
+            <button type="button" onClick={() => setBlocked(null)} aria-label="Hinweis schließen" className="text-muted hover:text-text">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted" />
           <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Spieler oder Club suchen" className="pl-9" aria-label="Spieler suchen" />
@@ -106,7 +121,11 @@ export function PlayerPicker({
           <li key={p.id}>
             <PlayerCard
               player={p}
-              onClick={() => onPick(p.id)}
+              onClick={() => {
+                setBlocked(null);
+                onPick(p.id);
+              }}
+              onDisabledClick={el.ok ? undefined : () => setBlocked(el.detail ?? el.reason)}
               disabled={!el.ok}
               disabledReason={el.ok ? undefined : el.reason}
               selected={p.id === replacing}
