@@ -109,10 +109,10 @@ async function OverallTable({ seasonId, from, to, highlightTeam }: { seasonId: s
           <span className={cn("num text-xl", row.rank === 1 ? "text-gold" : row.rank <= 3 ? "text-text-2" : "text-muted")}>{row.rank}</span>
           <div className="flex min-w-0 items-center gap-2.5">
             <span className="num hidden h-8 w-8 shrink-0 items-center justify-center bg-surface text-[11px] sm:flex">{initials(row.username)}</span>
-            <div className="min-w-0">
+            <Link href={`/app/managers/${row.fantasy_team_id}`} className="min-w-0 hover:text-gold">
               <div className="truncate text-sm font-bold">{row.is_me ? "Du" : row.username}</div>
               <div className="truncate text-xs text-muted">{row.team_name}</div>
-            </div>
+            </Link>
           </div>
           <span className="hidden text-right sm:block"><Delta value={row.rank_delta} /></span>
           <span className="num text-right text-base text-text-2">{formatPoints(row.last_round_points)}</span>
@@ -134,7 +134,7 @@ async function Rivals({ seasonId, myRank }: { seasonId: string; myRank: number }
         {data.map((row) => (
           <div key={row.fantasy_team_id} className={cn("flex items-center gap-3 border-t border-border px-3 py-2 text-sm", row.is_me && "bg-gold/10 font-bold")}>
             <span className="num w-10 text-base">{row.rank}</span>
-            <span className="flex-1 truncate">{row.is_me ? "Du" : row.username}</span>
+            <Link href={`/app/managers/${row.fantasy_team_id}`} className="flex-1 truncate hover:text-gold">{row.is_me ? "Du" : row.username}</Link>
             <span className="num text-base">{formatPoints(row.total_points)}</span>
           </div>
         ))}
@@ -181,7 +181,7 @@ async function MatchdayView({ rounds, roundId, myTeamId, page }: { rounds: { id:
         {(data ?? []).map((row) => (
           <div key={row.fantasy_team_id} className={cn("grid grid-cols-[44px_1fr_80px] items-center gap-2 border-t border-border px-3 py-2.5 first:border-t-0", row.is_me && "border-l-[6px] border-l-gold bg-gold/10", row.fantasy_team_id === myTeamId && "font-bold")}>
             <span className={cn("num text-xl", row.rank === 1 ? "text-gold" : "text-muted")}>{row.rank}</span>
-            <div className="min-w-0"><div className="truncate text-sm font-bold">{row.is_me ? "Du" : row.username}</div><div className="truncate text-xs text-muted">{row.team_name}</div></div>
+            <Link href={`/app/managers/${row.fantasy_team_id}?round=${round?.number ?? ""}`} className="min-w-0 hover:text-gold"><div className="truncate text-sm font-bold">{row.is_me ? "Du" : row.username}</div><div className="truncate text-xs text-muted">{row.team_name}</div></Link>
             <span className="num text-right text-xl">{formatPoints(row.points)}</span>
           </div>
         ))}
@@ -217,7 +217,7 @@ async function LeaguesView({ seasonId }: { seasonId: string }) {
             {rows.map((row) => (
               <div key={row.fantasy_team_id} className={cn("flex items-center gap-3 border-t border-border px-3 py-2 text-sm", row.is_me && "bg-gold/10 font-bold")}>
                 <span className="num w-8 text-base">{row.rank}</span>
-                <span className="flex-1 truncate">{row.is_me ? "Du" : row.username} <span className="text-muted">· {row.team_name}</span></span>
+                <Link href={`/app/managers/${row.fantasy_team_id}`} className="flex-1 truncate hover:text-gold">{row.is_me ? "Du" : row.username} <span className="text-muted">· {row.team_name}</span></Link>
                 <span className="num text-base">{formatPoints(row.total_points)}</span>
               </div>
             ))}
@@ -274,10 +274,10 @@ async function Participants({ seasonId, highlightTeam }: { seasonId: string; hig
               <span className="num text-xl text-muted">{i + 1}</span>
               <div className="flex min-w-0 items-center gap-2.5">
                 <span className="num hidden h-8 w-8 shrink-0 items-center justify-center bg-surface text-[11px] sm:flex">{initials(t.profile?.username ?? "?")}</span>
-                <div className="min-w-0">
+                <Link href={`/app/managers/${t.id}`} className="min-w-0 hover:text-gold">
                   <div className="truncate text-sm font-bold">{me ? "Du" : (t.profile?.username ?? "–")}</div>
                   <div className="truncate text-xs text-muted">{t.name}</div>
-                </div>
+                </Link>
               </div>
               <span className={cn("text-right text-[11px] font-semibold uppercase tracking-wider", t.is_complete ? "text-positive" : "text-muted")}>
                 {t.is_complete ? "Team steht" : "Baut noch"}
