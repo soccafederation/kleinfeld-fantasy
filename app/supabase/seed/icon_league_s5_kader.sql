@@ -93,7 +93,7 @@ begin
     ('ESP', 'Christian', 'Gawe', 'FIELD', 76, 6.5, 28, 'christian-gawe', null, false),
     ('ESP', 'Tim', 'Häußler', 'FIELD', 76, 6.5, 14, 'tim-haussler', null, false),
     ('ESP', 'Norbert', 'Jaszczak', 'FIELD', 86, 18.0, 10, 'norbert-jaszczak', 'https://images.ctfassets.net/m4vfhoz81zvx/5h67noq8qNU6Az3iw3tZQE/ac5272317551a94da8de02b9a454934e/EINTRACHT_SPANDAU_12_Norbert-Jaszoak-1.png', false),
-    ('ESP', 'Paul', 'Köhlstädt', 'FIELD', 83, 14.0, 18, 'paul-kohlstadt', 'https://images.ctfassets.net/m4vfhoz81zvx/ocC6genpxM9bigJBJuxzK/23744e8ec9aa12c71a9121a81db6ef79/EINTRACHT_SPANDAU_10_Paul-Kohlstaedt-1.png', false),
+    ('ESP', 'Paul', 'Kohlstädt', 'FIELD', 83, 14.0, 18, 'paul-kohlstadt', 'https://images.ctfassets.net/m4vfhoz81zvx/ocC6genpxM9bigJBJuxzK/23744e8ec9aa12c71a9121a81db6ef79/EINTRACHT_SPANDAU_10_Paul-Kohlstaedt-1.png', false),
     ('ESP', 'Daniel', 'Krasucki', 'FIELD', 74, 5.0, 99, 'daniel-krasucki', null, false),
     ('ESP', 'John', 'Lenkeit', 'FIELD', 76, 6.5, 37, 'john-lenkeit', null, false),
     ('ESP', 'Eudel', 'Monteiro', 'FIELD', 76, 6.5, 21, 'eudel-monteiro', null, false),
