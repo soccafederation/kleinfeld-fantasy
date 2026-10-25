@@ -113,12 +113,13 @@ function Row({ ok, children }: { ok: boolean; children: React.ReactNode }) {
   );
 }
 
-/** Transferzähler aus dem Dry-Run: "Transfers: X von N frei · Abzug −P Punkte". */
+/** Transferzähler aus dem Dry-Run: "Freie Transfers übrig: X von N · Abzug −P Punkte". */
 export function TransferCounter({ transfers, free, penalty, penaltyEach }: { transfers: number; free: number; penalty: number; penaltyEach: number }) {
+  const left = Math.max(0, free - transfers);
   return (
     <div className={cn("mt-3 flex items-center justify-between rounded border px-3 py-2 text-sm", penalty > 0 ? "border-red/50 bg-red/10" : "border-border bg-surface")}>
       <span>
-        Transfers: <span className="num">{transfers}</span> von {free} frei
+        Freie Transfers übrig: <span className="num">{left}</span> von {free}
       </span>
       <span className={cn("num", penalty > 0 ? "text-red" : "text-muted")}>
         {penalty > 0 ? `Abzug −${formatPoints(penalty)} Punkte` : `je weiterer −${formatPoints(penaltyEach)}`}
