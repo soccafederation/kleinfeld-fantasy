@@ -47,7 +47,7 @@ export function PlayerActionSheet({
             <PlayerAvatar name={player.player.display_name} imageUrl={player.player.image_url} size={64} isCaptain={isCaptain} ring={isCaptain ? "gold" : "none"} />
             <div className="grid flex-1 grid-cols-3 gap-2">
               <Metric label="Wert" value={formatMillions(player.market_value_m)} />
-              <Metric label="PTS" value={formatPoints(player.stats.total_points)} gold />
+              <Metric label="Saison" value={formatPoints(player.stats.total_points)} gold />
               <Metric label="Ø" value={formatPoints(player.stats.avg_points)} />
               <Metric label="Form (3)" value={formatPoints(player.stats.form3)} />
               <Metric label="Tore" value={formatPoints(player.stats.goals)} />
@@ -78,7 +78,7 @@ export function PlayerActionSheet({
                     key={c.season_player_id}
                     icon={isStarter ? ArrowRightLeft : ArrowLeftRight}
                     label={isStarter ? `Auf die Bank · ${other.player.display_name} rein` : `In die Startelf · ${other.player.display_name} raus`}
-                    hint={`${other.team.club.short_name} · ${formatPoints(other.stats.total_points)} PTS`}
+                    hint={`${other.team.club.short_name} · ${formatPoints(other.stats.total_points)} Saisonpunkte`}
                     onClick={() => onSwap(player.id, c.season_player_id)}
                   />
                 );

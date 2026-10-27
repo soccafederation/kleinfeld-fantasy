@@ -273,11 +273,11 @@ function TeamBuilderInner({ players, myTeam, rules, nextRound, seasonId, onboard
         <Pitch
           players={pitchPlayers}
           emptySlots={rules.squad}
-          pointsLabel="PTS"
+          pointsLabel="Saison"
           renderAction={(slot, index, p) => (
             <PitchSlot
               player={p}
-              pointsLabel="PTS"
+              pointsLabel="Saison"
               onClick={locked && !p ? undefined : () => (p ? setActionId(p.id) : setPickerRef({ slot, index }))}
             />
           )}

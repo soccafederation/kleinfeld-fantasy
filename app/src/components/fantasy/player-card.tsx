@@ -67,7 +67,7 @@ export function PlayerCard({
       </div>
       <div className="grid shrink-0 grid-cols-3 gap-3 text-right">
         <Metric label="Wert" value={formatMillions(player.market_value_m)} />
-        <Metric label="PTS" value={formatPoints(s.total_points)} gold />
+        <Metric label="Saison" value={formatPoints(s.total_points)} gold />
         {showValueRatio ? <Metric label="P/Mio" value={formatPoints(s.points_per_m)} /> : <Metric label="Ø" value={formatPoints(s.avg_points)} />}
       </div>
       {trailing}
