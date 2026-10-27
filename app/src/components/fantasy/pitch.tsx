@@ -13,6 +13,8 @@ export type PitchPlayer = {
   points?: number | null;
   value?: number;
   isCaptain?: boolean;
+  /** false = Punkte zählen nicht (Bankspieler ohne Nachrücken, ersetzter Starter). */
+  counted?: boolean;
   href?: string;
   onClickId?: string;
 };
@@ -112,9 +114,15 @@ export function PitchSlot({ player, compact, pointsLabel = "PTS", onClick }: { p
       <PlayerAvatar name={player.name} imageUrl={player.imageUrl} size={size} isCaptain={player.isCaptain} ring={player.isCaptain ? "gold" : "none"} />
       <span className="max-w-[76px] truncate text-[10px] font-semibold uppercase tracking-wide text-text-2">{player.shortName}</span>
       {player.points != null ? (
-        <span className="num text-xs text-gold">
-          {formatPoints(player.points)} <span className="text-[9px] text-muted">{pointsLabel}</span>
-        </span>
+        player.counted === false ? (
+          <span className="num text-xs text-muted-2 line-through" title="Zählt nicht für die Teamwertung">
+            {formatPoints(player.points)} <span className="text-[9px]">{pointsLabel}</span>
+          </span>
+        ) : (
+          <span className="num text-xs text-gold">
+            {formatPoints(player.points)} <span className="text-[9px] text-muted">{pointsLabel}</span>
+          </span>
+        )
       ) : player.value != null ? (
         <span className="num text-xs text-text-2">{formatMillions(player.value)}</span>
       ) : null}

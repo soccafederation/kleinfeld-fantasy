@@ -71,6 +71,9 @@ export default async function ManagerTeamPage({ params, searchParams }: { params
   const pts = new Map((pscores ?? []).map((p) => [p.season_player_id, Number(p.points)]));
   const byId = new Map(players.map((p) => [p.id, p]));
   const scored = !!score;
+  const subs = ((score?.auto_subs ?? []) as { in: string; out: string }[]);
+  const subIn = new Set(subs.map((x) => x.in));
+  const subOut = new Set(subs.map((x) => x.out));
 
   const pitch: PitchPlayer[] = (lps ?? []).flatMap((l) => {
     const p = byId.get(l.season_player_id);
@@ -89,6 +92,7 @@ export default async function ManagerTeamPage({ params, searchParams }: { params
         points: scored ? (raw ?? 0) * (isCap && l.slot !== "BENCH" ? 2 : 1) : null,
         value: p.market_value_m,
         isCaptain: isCap,
+        counted: l.slot === "BENCH" ? subIn.has(p.id) : !subOut.has(p.id),
         href: `/app/players/${p.id}`,
       },
     ];
@@ -132,7 +136,7 @@ export default async function ManagerTeamPage({ params, searchParams }: { params
       </Card>
 
       <Pitch players={pitch} pointsLabel="PTS" />
-      {scored && <p className="text-xs text-muted">Bankspieler punkten nur, wenn sie für einen Starter ohne Einsatz nachrücken. Kapitänspunkte zählen doppelt.</p>}
+      {scored && <p className="text-xs text-muted">Gewertet werden nur die 5 Startspieler. Ein Bankspieler zählt nur, wenn er für einen Starter ohne Einsatz nachrückt. Durchgestrichene Punkte zählen nicht. Kapitänspunkte zählen doppelt.</p>}
     </div>
   );
 }

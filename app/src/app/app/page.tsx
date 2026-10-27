@@ -82,6 +82,9 @@ export default async function DashboardPage() {
     for (const p of ps ?? []) lastRoundPlayerPoints.set(p.season_player_id, Number(p.points));
   }
 
+  const lastSubs = ((lastScore?.auto_subs ?? []) as { in: string; out: string }[]);
+  const lastSubIn = new Set(lastSubs.map((x) => x.in));
+  const lastSubOut = new Set(lastSubs.map((x) => x.out));
   const pitchPlayers: PitchPlayer[] = myTeam.roster.map((r) => ({
     id: r.season_player_id,
     name: r.player.player.display_name,
@@ -93,6 +96,7 @@ export default async function DashboardPage() {
     points: ctx.lastCompletedRound ? (lastRoundPlayerPoints.get(r.season_player_id) ?? 0) : null,
     value: r.player.market_value_m,
     isCaptain: r.season_player_id === captainId,
+    counted: r.slot === "BENCH" ? lastSubIn.has(r.season_player_id) : !lastSubOut.has(r.season_player_id),
     href: `/app/players/${r.season_player_id}`,
   }));
 
