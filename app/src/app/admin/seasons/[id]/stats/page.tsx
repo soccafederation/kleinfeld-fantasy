@@ -9,7 +9,10 @@ import { ActionForm } from "@/components/admin/action-form";
 import { Empty } from "@/components/admin/admin-shell";
 import { ImportStatusBadge, RoundStatusBadge } from "@/components/admin/status-badges";
 import { importStatsCsvAction, rejectImportAction } from "../../../stats-actions";
+import { IconLeagueImport } from "@/components/admin/icon-league-import";
 import type { Tables } from "@/lib/database.types";
+
+export const maxDuration = 60;
 
 type ImportRow = Tables<"statistic_imports"> & { importer: { username: string } | null };
 
@@ -37,9 +40,27 @@ export default async function SeasonStatsPage({ params }: { params: Promise<{ id
     perRound.set(s.round_id, e);
   }
 
+  // Vorauswahl: erster Spieltag ohne erfasste Werte
+  const nextToScore = rounds.find((r) => !perRound.get(r.id)?.total);
+
   return (
     <div className="grid gap-5 lg:grid-cols-[400px_1fr]">
-      <Card accent="gold">
+      <div className="flex flex-col gap-5">
+      {rounds.length > 0 && (
+        <Card accent="gold">
+          <CardHeader>
+            <CardTitle>Icon League: Spieltag auswerten</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <IconLeagueImport
+              seasonId={id}
+              rounds={rounds.map((r) => ({ id: r.id, number: r.number, name: r.name, status: r.status }))}
+              defaultRoundId={(nextToScore ?? defaultRound)?.id}
+            />
+          </CardContent>
+        </Card>
+      )}
+      <Card>
         <CardHeader>
           <CardTitle>Statistik importieren (CSV)</CardTitle>
         </CardHeader>
@@ -98,6 +119,7 @@ export default async function SeasonStatsPage({ params }: { params: Promise<{ id
           )}
         </CardContent>
       </Card>
+      </div>
 
       <div className="flex flex-col gap-5">
         <Card>
