@@ -36,6 +36,8 @@ export const UNTRACKED_PRIOR: Record<string, Record<string, Record<string, numbe
   "season-5": {
     // Michael Kobert: Spieltag 1 (vor seiner Aufnahme ab Spieltag 2)
     "michael-kobert": { appearances: 1, goals: 1, shots: 2, dribbles_success: 1, dribbles: 1, fouls_suffered: 1, passes_success: 3, passes: 4, passes_failed: 1, ball_actions: 10 },
+    // Jonas Rohana: Einsatz an Spieltag 3 als Special Guest (ohne Werte), fest im Kader ab 07.11.
+    "jonas-rohana": { appearances: 1 },
   },
 };
 
