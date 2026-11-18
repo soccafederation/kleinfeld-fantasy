@@ -47,7 +47,7 @@ def main(md, new_path, old_path, out_path):
     vals = ",\n".join(f"  ('{tm}', '{esc(n)}', '{sl}', '{k}', {d[k]})" for tm, n, sl, d in rows for k in KEYS)
     goals = sum(d["goals"] for _, _, _, d in rows)
     sql = f"""-- Spieltag {md}: Statistiken ({len(rows)} Spieler x {len(KEYS)} Werte) eintragen, freigeben, Punkte berechnen.
--- Zuordnung über Icon-League-Slug (unabhängig von der Schreibweise des Namens).
+-- Zuordnung nur über den Icon-League-Slug (unabhängig von Name und aktuellem Club, Transfers sind egal).
 -- Werte = Icon-League-Gesamtwerte nach Spieltag {md} minus Stand nach Spieltag {md - 1}.
 -- Komplett im Supabase SQL Editor ausführen (bei Nachfrage "Run without RLS").
 select lock_due_rounds();
@@ -59,11 +59,9 @@ insert into {t} values
 insert into player_round_statistics (round_id, season_player_id, stat_key, value, status)
 select r.id, sp.id, i.stat_key, i.value, 'published'
 from {t} i
-join clubs c on c.short_name = i.team
-join season_teams st on st.club_id = c.id
-join seasons s on s.id = st.season_id and s.slug = 'season-5'
-join season_players sp on sp.season_team_id = st.id
-join players p on p.id = sp.player_id and p.external_refs->>'icon_slug' = i.icon_slug
+join players p on p.external_refs->>'icon_slug' = i.icon_slug
+join season_players sp on sp.player_id = p.id
+join seasons s on s.id = sp.season_id and s.slug = 'season-5'
 join fantasy_rounds r on r.season_id = s.id and r.number = {md}
 on conflict (round_id, season_player_id, stat_key) do update set value = excluded.value, status = 'published';
 
@@ -76,9 +74,8 @@ select 'nicht zugeordnet' as info, i.team || ' ' || i.full_name as wert
 from (select distinct team, full_name, icon_slug from {t}) i
 where not exists (
   select 1 from season_players sp join players p on p.id = sp.player_id
-  join season_teams st on st.id = sp.season_team_id join clubs c on c.id = st.club_id
   join seasons s on s.id = sp.season_id
-  where s.slug = 'season-5' and c.short_name = i.team and p.external_refs->>'icon_slug' = i.icon_slug)
+  where s.slug = 'season-5' and p.external_refs->>'icon_slug' = i.icon_slug)
 union all
 select 'Spieler / Tore (erwartet {len(rows)} / {goals}, abzgl. Heros)',
        count(distinct prs.season_player_id)::text || ' / ' || sum(case when prs.stat_key = 'goals' then prs.value else 0 end)::text
