@@ -64,17 +64,22 @@ export default async function ManagerTeamPage({ params, searchParams }: { params
   // Alle eingefrorenen Aufstellungen dieses Teams mit Spielern, Spielerpunkten und Teampunkten
   const lineupIds = list.map((l) => l.id);
   const roundIds = list.map((l) => l.round.id);
-  const [{ data: allLps }, { data: allScores }] = await Promise.all([
+  const roundIdSet = new Set(roundIds);
+  const [{ data: allLps, error: lpErr }, { data: scoreRows, error: scoreErr }, { data: overall }] = await Promise.all([
     supabase.from("fantasy_lineup_players").select("lineup_id, season_player_id, slot, slot_order").in("lineup_id", lineupIds),
-    supabase.from("fantasy_team_scores").select("round_id, total_points, transfer_penalty, auto_subs").eq("fantasy_team_id", team.id).in("round_id", roundIds),
+    supabase.from("fantasy_team_scores").select("round_id, total_points, transfer_penalty, auto_subs").eq("fantasy_team_id", team.id),
+    supabase.from("leaderboard_overall").select("total_points").eq("fantasy_team_id", team.id).maybeSingle(),
   ]);
+  const allScores = (scoreRows ?? []).filter((s) => roundIdSet.has(s.round_id));
   const playerIds = [...new Set((allLps ?? []).map((l) => l.season_player_id))];
-  const { data: pscores } = playerIds.length
-    ? await supabase.from("fantasy_player_scores").select("round_id, season_player_id, points").in("round_id", roundIds).in("season_player_id", playerIds)
-    : { data: [] as { round_id: string; season_player_id: string; points: number }[] };
-  const pts = new Map((pscores ?? []).map((p) => [`${p.round_id}:${p.season_player_id}`, Number(p.points)]));
-  const roundsWithStats = new Set((pscores ?? []).map((p) => p.round_id));
-  const scoreByRound = new Map((allScores ?? []).map((s) => [s.round_id, s]));
+  const { data: pscoreRows, error: psErr } = playerIds.length
+    ? await supabase.from("fantasy_player_scores").select("round_id, season_player_id, points").in("season_player_id", playerIds)
+    : { data: [] as { round_id: string; season_player_id: string; points: number }[], error: null };
+  const pscores = (pscoreRows ?? []).filter((p) => roundIdSet.has(p.round_id));
+  const loadError = lpErr?.message ?? scoreErr?.message ?? psErr?.message ?? null;
+  const pts = new Map(pscores.map((p) => [`${p.round_id}:${p.season_player_id}`, Number(p.points)]));
+  const roundsWithStats = new Set(pscores.map((p) => p.round_id));
+  const scoreByRound = new Map(allScores.map((s) => [s.round_id, s]));
   const byId = new Map(players.map((p) => [p.id, p]));
 
   type Sub = { in: string; out: string };
@@ -109,8 +114,8 @@ export default async function ManagerTeamPage({ params, searchParams }: { params
   };
 
   // Gesamt: aktuelle Aufstellung, je Spieler alle Punkte, die er für dieses Team geholt hat
-  const seasonTotal = (allScores ?? []).reduce((sum, s) => sum + Number(s.total_points), 0);
-  const seasonPenalty = (allScores ?? []).reduce((sum, s) => sum + Number(s.transfer_penalty), 0);
+  const seasonTotal = overall?.total_points != null ? Number(overall.total_points) : allScores.reduce((sum, s) => sum + Number(s.total_points), 0);
+  const seasonPenalty = allScores.reduce((sum, s) => sum + Number(s.transfer_penalty), 0);
   const totalByPlayer = new Map<string, number>();
   for (const l of list) {
     if (!scoreByRound.has(l.round.id)) continue;
@@ -184,6 +189,7 @@ export default async function ManagerTeamPage({ params, searchParams }: { params
         )}
       </Card>
 
+      {loadError && <p className="text-xs text-red">Punkte konnten nicht geladen werden: {loadError}</p>}
       <Pitch players={pitch} pointsLabel="PTS" />
       {showTotal && formerPlayers.length > 0 && (
         <Card className="px-4 py-3">
