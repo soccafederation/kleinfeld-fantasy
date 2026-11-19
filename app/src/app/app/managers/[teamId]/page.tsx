@@ -67,7 +67,7 @@ export default async function ManagerTeamPage({ params, searchParams }: { params
   const roundIdSet = new Set(roundIds);
   const [{ data: allLps, error: lpErr }, { data: scoreRows, error: scoreErr }, { data: overall }] = await Promise.all([
     supabase.from("fantasy_lineup_players").select("lineup_id, season_player_id, slot, slot_order").in("lineup_id", lineupIds),
-    supabase.from("fantasy_team_scores").select("round_id, total_points, transfer_penalty, auto_subs").eq("fantasy_team_id", team.id),
+    supabase.from("fantasy_team_scores").select("*").eq("fantasy_team_id", team.id),
     supabase.from("leaderboard_overall").select("total_points").eq("fantasy_team_id", team.id).maybeSingle(),
   ]);
   const allScores = (scoreRows ?? []).filter((s) => roundIdSet.has(s.round_id));
@@ -86,7 +86,7 @@ export default async function ManagerTeamPage({ params, searchParams }: { params
   /** Punkte, die ein Spieler in diesem Spieltag für das Team geholt hat (Kapitän doppelt, Bank nur als Nachrücker). */
   const contribution = (l: L, playerId: string, slot: string) => {
     const s = scoreByRound.get(l.round.id);
-    const subs = ((s?.auto_subs ?? []) as Sub[]);
+    const subs = (((s as { auto_subs?: unknown } | undefined)?.auto_subs ?? []) as Sub[]);
     const counted = slot === "BENCH" ? subs.some((x) => x.in === playerId) : !subs.some((x) => x.out === playerId);
     const raw = pts.get(`${l.round.id}:${playerId}`) ?? 0;
     return { raw: raw * (l.captain_season_player_id === playerId && slot !== "BENCH" ? 2 : 1), counted };
