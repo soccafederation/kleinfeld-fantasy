@@ -5,7 +5,7 @@ import { requireStaff } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { writeAudit } from "@/lib/admin/audit";
 import { done, fail, str, type ActionState } from "@/lib/admin/result";
-import { computeRoundDeltas, fetchCumulative, iconSeasonSlug, UNTRACKED_PRIOR } from "@/lib/icon-league/stats";
+import { fetchMatches, iconSeasonSlug, roundMatchIds, STAT_KEYS, type CumulativePlayer, type RoundDelta } from "@/lib/icon-league/stats";
 
 export type IconLeagueImportResult = {
   mode: "check" | "apply";
@@ -18,31 +18,6 @@ export type IconLeagueImportResult = {
   existingRows: number;
   teams?: number;
 };
-
-type Admin = ReturnType<typeof createAdminClient>;
-
-async function priorSums(admin: Admin, roundIds: string[]) {
-  const sums = new Map<string, Record<string, number>>();
-  if (!roundIds.length) return sums;
-  const pageSize = 1000;
-  for (let from = 0; ; from += pageSize) {
-    const { data, error } = await admin
-      .from("player_round_statistics")
-      .select("season_player_id, stat_key, value")
-      .in("round_id", roundIds)
-      .in("status", ["confirmed", "published", "corrected"])
-      .order("id")
-      .range(from, from + pageSize - 1);
-    if (error) throw new Error(error.message);
-    for (const r of data ?? []) {
-      const e = sums.get(r.season_player_id) ?? {};
-      e[r.stat_key] = (e[r.stat_key] ?? 0) + Number(r.value);
-      sums.set(r.season_player_id, e);
-    }
-    if (!data || data.length < pageSize) break;
-  }
-  return sums;
-}
 
 /**
  * Spieltag direkt von der Icon League auswerten.
@@ -62,44 +37,42 @@ export async function importIconLeagueRoundAction(_prev: ActionState, fd: FormDa
   ]);
   if (!season || !round || round.season_id !== seasonId) return fail("Spieltag nicht gefunden.");
 
-  let cumulative;
+  // Werte direkt pro Spiel dieses Spieltags (keine Differenzrechnung, Lücken in Vorspieltagen sind egal)
+  const matchIds = roundMatchIds(season.slug, round.number);
+  let roundStats: Map<string, CumulativePlayer>;
   try {
-    cumulative = await fetchCumulative(iconSeasonSlug(season.slug));
+    roundStats = await fetchMatches(iconSeasonSlug(season.slug), matchIds);
   } catch (e) {
     return fail(`Icon League nicht erreichbar: ${e instanceof Error ? e.message : String(e)}`);
   }
-  if (!cumulative.size) return fail("Die Icon League liefert keine Statistiken für diese Saison.");
 
-  const [{ data: sp }, { data: earlier }, { count: existingRows }] = await Promise.all([
+  const [{ data: sp }, { count: existingRows }] = await Promise.all([
     admin.from("season_players").select("id, player:players(external_refs)").eq("season_id", seasonId),
-    admin.from("fantasy_rounds").select("id").eq("season_id", seasonId).lt("number", round.number),
     admin.from("player_round_statistics").select("id", { count: "exact", head: true }).eq("round_id", roundId),
   ]);
-  const ourPlayers = (sp ?? [])
-    .map((r) => {
-      const refs = (r.player as unknown as { external_refs: { icon_slug?: string } | null } | null)?.external_refs;
-      return { seasonPlayerId: r.id, slug: refs?.icon_slug ?? "" };
-    })
-    .filter((p) => p.slug);
+  const bySlug = new Map(
+    (sp ?? [])
+      .map((r) => [(r.player as unknown as { external_refs: { icon_slug?: string } | null } | null)?.external_refs?.icon_slug ?? "", r.id] as const)
+      .filter(([slug]) => slug),
+  );
 
-  let prior;
-  try {
-    prior = await priorSums(admin, (earlier ?? []).map((r) => r.id));
-  } catch (e) {
-    return fail(`Vorspieltage konnten nicht gelesen werden: ${e instanceof Error ? e.message : String(e)}`);
-  }
-
-  if (round.number > 1) {
-    for (const [slug, extra] of Object.entries(UNTRACKED_PRIOR[season.slug] ?? {})) {
-      const spId = ourPlayers.find((p) => p.slug === slug)?.seasonPlayerId;
-      if (!spId) continue;
-      const e = prior.get(spId) ?? {};
-      for (const [k, v] of Object.entries(extra)) e[k] = (e[k] ?? 0) + v;
-      prior.set(spId, e);
+  const deltas: RoundDelta[] = [];
+  const unmatched: CumulativePlayer[] = [];
+  for (const c of roundStats.values()) {
+    if ((c.stats.appearances ?? 0) < 1) continue;
+    const spId = bySlug.get(c.slug);
+    if (!spId) {
+      unmatched.push(c);
+      continue;
     }
+    const stats = Object.fromEntries(STAT_KEYS.map((k) => [k, Math.max(0, c.stats[k] ?? 0)]));
+    deltas.push({ seasonPlayerId: spId, slug: c.slug, name: c.name, stats, clamped: [] });
   }
+  deltas.sort((x, y) => x.name.localeCompare(y.name, "de"));
+  unmatched.sort((x, y) => x.name.localeCompare(y.name, "de"));
+  const tooMany = deltas.filter((d) => d.stats.appearances > 1).map((d) => d.name);
+  if (tooMany.length) return fail(`Unplausibel: mehr als ein Einsatz an Spieltag ${round.number} (${tooMany.slice(0, 3).join(", ")}). Bitte Claude Bescheid geben.`);
 
-  const { deltas, unmatched } = computeRoundDeltas(cumulative, ourPlayers, prior);
   const result: IconLeagueImportResult = {
     mode,
     round: round.number,

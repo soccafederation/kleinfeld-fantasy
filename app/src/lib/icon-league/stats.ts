@@ -57,13 +57,27 @@ type MetricsResponse = {
   }[];
 };
 
-/** Alle Saisonwerte aller Spieler holen (eine Abfrage je Metrik, 100 Spieler pro Seite). */
-export async function fetchCumulative(seasonSlug: string): Promise<Map<string, CumulativePlayer>> {
+/**
+ * Spiel-IDs eines regulären Spieltags: 12 Teams = 6 Spiele pro Spieltag, fortlaufend nummeriert
+ * (Spieltag 1 = TIL_S5_M00001..00006, Spieltag 7 = M00037..00042).
+ */
+export function roundMatchIds(ourSeasonSlug: string, roundNumber: number, perRound = 6) {
+  const season = ourSeasonSlug.match(/(\d+)$/)?.[1] ?? "5";
+  return Array.from({ length: perRound }, (_, i) => `TIL_S${season}_M${String((roundNumber - 1) * perRound + i + 1).padStart(5, "0")}`);
+}
+
+/** Werte genau dieser Spiele (ein Spieltag), direkt pro Spiel von der Icon League. */
+export function fetchMatches(seasonSlug: string, matchIds: string[]) {
+  return fetchCumulative(seasonSlug, matchIds.map((m) => `&matches[]=${encodeURIComponent(m)}`).join(""));
+}
+
+/** Alle Saisonwerte aller Spieler holen (eine Abfrage je Metrik, 100 Spieler pro Seite). Optional auf Spiele gefiltert. */
+export async function fetchCumulative(seasonSlug: string, extraQuery = ""): Promise<Map<string, CumulativePlayer>> {
   const out = new Map<string, CumulativePlayer>();
   await Promise.all(
     Object.entries(METRIC_MAP).map(async ([metric, key]) => {
       for (let page = 1; page < 10; page++) {
-        const url = `${ICON_LEAGUE_API}/metrics?type=player&seasonSlug=${encodeURIComponent(seasonSlug)}&limit=100&sortOrder=desc&metricTypes[]=${metric}&sortBy=${metric}&page=${page}`;
+        const url = `${ICON_LEAGUE_API}/metrics?type=player&seasonSlug=${encodeURIComponent(seasonSlug)}&limit=100&sortOrder=desc&metricTypes[]=${metric}&sortBy=${metric}&page=${page}${extraQuery}`;
         const res = await fetch(url, {
           headers: { Accept: "application/json", Referer: "https://www.theiconleague.com/", Origin: "https://www.theiconleague.com" },
           cache: "no-store",
